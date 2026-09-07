@@ -265,8 +265,8 @@ const uint64_t DATABASE_READ_BUFFER_MB_DEFAULT_SIZE          = 10;
 const uint32_t DATABASE_DEFAULT_MAX_OPEN_FILES               = 100;
 const uint16_t DATABASE_DEFAULT_BACKGROUND_THREADS_COUNT     = 2;
 
-const char     LATEST_VERSION_URL[]                          = "https://meduzcoin.com"; // TODO: update once domain/site is live
-const std::string LICENSE_URL                                = "https://github.com/YOUR_GITHUB/meduzcoin/blob/master/LICENSE"; // TODO: update with your repo
+const char     LATEST_VERSION_URL[]                          = "https://github.com/meduztrade-maker/meduzcoin/releases";
+const std::string LICENSE_URL                                = "https://github.com/meduztrade-maker/meduzcoin/blob/main/LICENSE";
 const static   boost::uuids::uuid CRYPTONOTE_NETWORK         =
 {
     {  0x9f, 0xf4, 0x8e, 0x37, 0xe3, 0xf6, 0x49, 0x5e, 0x8f, 0xd1, 0x6e, 0xed, 0xb0, 0x10, 0x4c, 0x35  }
