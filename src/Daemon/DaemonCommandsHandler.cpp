@@ -4,6 +4,8 @@
 // Please see the included LICENSE file for more information.
 
 #include <boost/format.hpp>
+#include <boost/bind/placeholders.hpp>
+using boost::placeholders::_1; // scoped just to this file, avoids clashing with std::placeholders used elsewhere
 
 #include <ctime>
 

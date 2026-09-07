@@ -10,7 +10,7 @@ endif()
 set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build, options are: Debug, Release, RelWithDebInfo")
 set(CMAKE_CONFIGURATION_TYPES Debug RelWithDebInfo Release CACHE TYPE INTERNAL)
 
-project(TurtleCoin)
+project(Meduz)
 
 # Required for finding Threads on ARM
 enable_language(C)
@@ -189,6 +189,7 @@ if(NOT MSVC)
   endif()
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11 ${STATICASSERTC_FLAG} ${WARNINGS} ${C_WARNINGS} ${ARCH_FLAG} ${MAES_FLAG}")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 ${STATICASSERTCPP_FLAG} ${WARNINGS} ${CXX_WARNINGS} ${ARCH_FLAG} ${MAES_FLAG}")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -include ${CMAKE_SOURCE_DIR}/src/compat_fixes.h") # modern-GCC missing-transitive-include shim
 
   if(APPLE)
       if (CMAKE_C_COMPILER_ID STREQUAL "GNU")
@@ -241,7 +242,7 @@ endif()
 
 ## Go get us some static BOOST libraries
 set(Boost_USE_STATIC_LIBS ON)
-set(Boost_USE_STATIC_RUNTIME ON)
+set(Boost_USE_STATIC_RUNTIME OFF) # relaxed for quick local test build; use the project's Dockerfile for real static release builds
 find_package(Boost REQUIRED COMPONENTS system filesystem thread date_time chrono regex serialization)
 message(STATUS "Boost Found: ${Boost_INCLUDE_DIRS}")
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
@@ -295,7 +296,7 @@ add_subdirectory(src)
 ## We need to setup the RocksDB build environment to match our system
 if(NOT MSVC)
     execute_process(
-        COMMAND cmake ${CMAKE_CURRENT_SOURCE_DIR}/external/rocksdb -DWITH_LZ4=ON -DWITH_GFLAGS=0 -DCMAKE_BUILD_TYPE=MinSizeRel -DWITH_TESTS=OFF -DWITH_TOOLS=OFF -DPORTABLE=ON -B${PROJECT_BINARY_DIR}/rocksdb
+        COMMAND cmake ${CMAKE_CURRENT_SOURCE_DIR}/external/rocksdb -DWITH_LZ4=ON -DWITH_GFLAGS=0 -DCMAKE_BUILD_TYPE=MinSizeRel -DWITH_TESTS=OFF -DWITH_TOOLS=OFF -DPORTABLE=ON "-DCMAKE_CXX_FLAGS=-include ${CMAKE_CURRENT_SOURCE_DIR}/src/compat_fixes.h" -B${PROJECT_BINARY_DIR}/rocksdb
     )
   set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_BINARY_DIR}/rocksdb/librocksdb.a")
 endif()
