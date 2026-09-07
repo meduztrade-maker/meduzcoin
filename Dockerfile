@@ -18,11 +18,11 @@ FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
     libboost-system1.83.0 libboost-filesystem1.83.0 libboost-serialization1.83.0 \
-    ca-certificates \
+    ca-certificates coreutils \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /src/build/src/meduzd /usr/local/bin/meduzd
 
 EXPOSE 27897 27898
 
-ENTRYPOINT ["/usr/local/bin/meduzd", "--data-dir", "/data", "--no-console", "--rpc-bind-ip", "0.0.0.0", "--p2p-bind-ip", "0.0.0.0"]
+ENTRYPOINT ["stdbuf", "-oL", "-eL", "/usr/local/bin/meduzd", "--data-dir", "/data", "--no-console", "--rpc-bind-ip", "0.0.0.0", "--p2p-bind-ip", "0.0.0.0"]
