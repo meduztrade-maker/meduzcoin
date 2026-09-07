@@ -25,4 +25,4 @@ COPY --from=builder /src/build/src/meduzd /usr/local/bin/meduzd
 
 EXPOSE 27897 27898
 
-ENTRYPOINT ["stdbuf", "-oL", "-eL", "/usr/local/bin/meduzd", "--data-dir", "/data", "--no-console", "--rpc-bind-ip", "0.0.0.0", "--p2p-bind-ip", "0.0.0.0"]
+ENTRYPOINT ["stdbuf", "-oL", "-eL", "/usr/local/bin/meduzd", "--data-dir", "/data", "--no-console", "--rpc-bind-ip", "0.0.0.0", "--p2p-bind-ip", "0.0.0.0", "--log-level", "4"]
