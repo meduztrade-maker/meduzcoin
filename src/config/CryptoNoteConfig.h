@@ -272,9 +272,8 @@ const static   boost::uuids::uuid CRYPTONOTE_NETWORK         =
     {  0x9f, 0xf4, 0x8e, 0x37, 0xe3, 0xf6, 0x49, 0x5e, 0x8f, 0xd1, 0x6e, 0xed, 0xb0, 0x10, 0x4c, 0x35  }
 };
 
-// TODO: fill in once you have your own always-on VPS node(s) running.
-// Empty for now on purpose - without your own seed nodes here, nodes
-// can't find each other on a fresh network.
+// TODO: add more seed nodes as you deploy them, for redundancy.
 const char* const SEED_NODES[] = {
+  "tokaido.proxy.rlwy.net:26381" // Railway trial seed node
 };
 } // CryptoNote
