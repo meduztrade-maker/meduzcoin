@@ -12,7 +12,7 @@ RUN sed -i 's/set(Boost_USE_STATIC_RUNTIME ON)/set(Boost_USE_STATIC_RUNTIME OFF)
 
 RUN mkdir -p build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc) meduzd
+    make -j$(nproc) TurtleCoind
 
 FROM ubuntu:24.04
 
