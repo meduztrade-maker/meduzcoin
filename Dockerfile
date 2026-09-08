@@ -12,7 +12,7 @@ RUN sed -i 's/set(Boost_USE_STATIC_RUNTIME ON)/set(Boost_USE_STATIC_RUNTIME OFF)
 
 RUN mkdir -p build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc) TurtleCoind miner
+    make -j$(nproc) TurtleCoind miner WalletService
 
 FROM ubuntu:24.04
 
@@ -23,6 +23,7 @@ RUN apt-get update && apt-get install -y \
 
 COPY --from=builder /src/build/src/meduzd /usr/local/bin/meduzd
 COPY --from=builder /src/build/src/miner /usr/local/bin/miner
+COPY --from=builder /src/build/src/meduz-service /usr/local/bin/meduz-service
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
