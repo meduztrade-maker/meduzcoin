@@ -44,7 +44,7 @@ const unsigned EMISSION_SPEED_FACTOR                         = 25;
 static_assert(EMISSION_SPEED_FACTOR <= 8 * sizeof(uint64_t), "Bad EMISSION_SPEED_FACTOR");
 
 /* Premine amount */
-const uint64_t GENESIS_BLOCK_REWARD                          = UINT64_C(0);
+const uint64_t GENESIS_BLOCK_REWARD                          = UINT64_C(500000000); // 5,000,000 MDZ = 10% of the 50,000,000 total supply, fixed founder premine
 
 /* How to generate a premine:
 
@@ -66,7 +66,7 @@ TurtleCoind --print-genesis-tx --genesis-block-reward-address TRTLv2Fyavy8CXG8BP
 * You should see your premine appear in the previously generated wallet.
 
 */
-const char     GENESIS_COINBASE_TX_HEX[]                     = "012801ff000100022d685b2c60938053504b0bfa7687d2d333d2c37c75d7697442d7c41733a573a3210186f23d660294dc361e353f71e65f411d6eb451ee7b30504744a5847cd94c5dd0";
+const char     GENESIS_COINBASE_TX_HEX[]                     = "012801ff000180cab5ee010214de63c0df8b6dc164a23e0c625cfa3924d0d09908d803e336fdfd2a9422df372101e89507e9d644b866a3e1259e9dee44cd54c9ab239864fd965eb24ea561d7a2ce";
 static_assert(sizeof(GENESIS_COINBASE_TX_HEX)/sizeof(*GENESIS_COINBASE_TX_HEX) != 1, "GENESIS_COINBASE_TX_HEX must not be empty.");
 
 /* This is the unix timestamp of the first "mined" block (technically block 2, not the genesis block)
