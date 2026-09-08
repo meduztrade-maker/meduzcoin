@@ -12,17 +12,20 @@ RUN sed -i 's/set(Boost_USE_STATIC_RUNTIME ON)/set(Boost_USE_STATIC_RUNTIME OFF)
 
 RUN mkdir -p build && cd build && \
     cmake .. -DCMAKE_BUILD_TYPE=Release && \
-    make -j$(nproc) TurtleCoind
+    make -j$(nproc) TurtleCoind miner
 
 FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
     libboost-system1.83.0 libboost-filesystem1.83.0 libboost-serialization1.83.0 \
-    ca-certificates coreutils \
+    ca-certificates coreutils curl bash \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /src/build/src/meduzd /usr/local/bin/meduzd
+COPY --from=builder /src/build/src/miner /usr/local/bin/miner
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 27897 27898
 
-ENTRYPOINT ["stdbuf", "-oL", "-eL", "/usr/local/bin/meduzd", "--data-dir", "/data", "--no-console", "--rpc-bind-ip", "0.0.0.0", "--p2p-bind-ip", "0.0.0.0"]
+ENTRYPOINT ["stdbuf", "-oL", "-eL", "/usr/local/bin/entrypoint.sh"]
