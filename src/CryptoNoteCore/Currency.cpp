@@ -148,13 +148,24 @@ uint32_t Currency::upgradeHeight(uint8_t majorVersion) const {
 }
 
 bool Currency::getBlockReward(uint8_t blockMajorVersion, size_t medianSize, size_t currentBlockSize, uint64_t alreadyGeneratedCoins,
-  uint64_t fee, uint64_t& reward, int64_t& emissionChange) const {
+  uint64_t fee, uint64_t& reward, int64_t& emissionChange, uint32_t height) const {
   assert(alreadyGeneratedCoins <= m_moneySupply);
   assert(m_emissionSpeedFactor > 0 && m_emissionSpeedFactor <= 8 * sizeof(uint64_t));
 
   uint64_t baseReward = (m_moneySupply - alreadyGeneratedCoins) >> m_emissionSpeedFactor;
   if (alreadyGeneratedCoins == 0 && m_genesisBlockReward != 0) {
     baseReward = m_genesisBlockReward;
+  }
+
+  // Founder bonus: paid out on a specific regular (normally-mined) block height,
+  // rather than baked into the synthetic genesis block. This fork's wallet sync
+  // treats the genesis block as always "already known" and never scans its
+  // outputs for wallet balance purposes - so a genesis premine is invisible to
+  // any wallet. A bonus on a normal mined height goes through the exact same
+  // path as every other block reward, which wallets do scan correctly. Applied
+  // here (not just in template construction) so block validation agrees too.
+  if (m_founderBonusAmount != 0 && height == m_founderBonusHeight) {
+    baseReward += m_founderBonusAmount;
   }
 
   size_t blockGrantedFullRewardZone = blockGrantedFullRewardZoneByBlockVersion(blockMajorVersion);
@@ -201,7 +212,7 @@ bool Currency::constructMinerTx(uint8_t blockMajorVersion, uint32_t height, size
 
   uint64_t blockReward;
   int64_t emissionChange;
-  if (!getBlockReward(blockMajorVersion, medianSize, currentBlockSize, alreadyGeneratedCoins, fee, blockReward, emissionChange)) {
+  if (!getBlockReward(blockMajorVersion, medianSize, currentBlockSize, alreadyGeneratedCoins, fee, blockReward, emissionChange, height)) {
     logger(INFO) << "Block is too big";
     return false;
   }
@@ -650,6 +661,8 @@ m_blocksFileName(currency.m_blocksFileName),
 m_blockIndexesFileName(currency.m_blockIndexesFileName),
 m_txPoolFileName(currency.m_txPoolFileName),
 m_genesisBlockReward(currency.m_genesisBlockReward),
+m_founderBonusHeight(currency.m_founderBonusHeight),
+m_founderBonusAmount(currency.m_founderBonusAmount),
 m_zawyDifficultyBlockIndex(currency.m_zawyDifficultyBlockIndex),
 m_zawyDifficultyV2(currency.m_zawyDifficultyV2),
 m_zawyDifficultyBlockVersion(currency.m_zawyDifficultyBlockVersion),
@@ -672,6 +685,8 @@ CurrencyBuilder::CurrencyBuilder(std::shared_ptr<Logging::ILogger> log) : m_curr
   moneySupply(parameters::MONEY_SUPPLY);
   emissionSpeedFactor(parameters::EMISSION_SPEED_FACTOR);
 genesisBlockReward(parameters::GENESIS_BLOCK_REWARD);
+founderBonusHeight(parameters::FOUNDER_BONUS_HEIGHT);
+founderBonusAmount(parameters::FOUNDER_BONUS_AMOUNT);
 
   rewardBlocksWindow(parameters::CRYPTONOTE_REWARD_BLOCKS_WINDOW);
 zawyDifficultyBlockIndex(parameters::ZAWY_DIFFICULTY_BLOCK_INDEX);
