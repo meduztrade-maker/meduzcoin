@@ -20,9 +20,23 @@ for i in $(seq 1 60); do
   sleep 1
 done
 
-echo "[entrypoint] starting miner -> ${MINE_ADDRESS} (${MINE_THREADS} thread(s))"
-/usr/local/bin/miner --daemon-address 127.0.0.1:27898 --address "$MINE_ADDRESS" --threads "$MINE_THREADS" &
-MINER_PID=$!
+if [ "$MINE_THREADS" -gt 0 ] 2>/dev/null; then
+  echo "[entrypoint] waiting for daemon to report synced before starting miner (avoids spamming retries against a busy core)..."
+  for i in $(seq 1 300); do
+    SYNCED=$(curl -s -m 2 -X POST http://127.0.0.1:27898/getinfo 2>/dev/null | grep -o '"synced":[a-z]*' | cut -d: -f2)
+    if [ "$SYNCED" = "true" ]; then
+      echo "[entrypoint] daemon reports synced after ${i}s"
+      break
+    fi
+    sleep 1
+  done
+
+  echo "[entrypoint] starting miner -> ${MINE_ADDRESS} (${MINE_THREADS} thread(s))"
+  /usr/local/bin/miner --daemon-address 127.0.0.1:27898 --address "$MINE_ADDRESS" --threads "$MINE_THREADS" &
+  MINER_PID=$!
+else
+  echo "[entrypoint] MINE_THREADS=0, not starting miner"
+fi
 
 if [ -n "$WALLET_VIEW_KEY" ] && [ -n "$WALLET_SPEND_KEY" ]; then
   if [ ! -f /data/wallet.wallet ]; then
