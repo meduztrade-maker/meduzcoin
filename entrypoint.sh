@@ -12,7 +12,14 @@ PRIORITY_NODE="${PRIORITY_NODE:-}"
 
 PRIORITY_ARGS=()
 if [ -n "$PRIORITY_NODE" ]; then
-  PRIORITY_ARGS=(--add-priority-node "$PRIORITY_NODE")
+  PRIORITY_HOST="${PRIORITY_NODE%%:*}"
+  PRIORITY_PORT="${PRIORITY_NODE##*:}"
+  RESOLVED_IP=$(getent hosts "$PRIORITY_HOST" | awk '{print $1}' | head -1)
+  if [ -n "$RESOLVED_IP" ]; then
+    PRIORITY_ARGS=(--add-priority-node "${RESOLVED_IP}:${PRIORITY_PORT}")
+  else
+    echo "[entrypoint] WARNING: could not resolve ${PRIORITY_HOST}, skipping priority node"
+  fi
 fi
 echo "[entrypoint] PRIORITY_ARGS: ${PRIORITY_ARGS[@]}"
 
