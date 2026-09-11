@@ -342,6 +342,7 @@ std::string print_peerlist_to_string(const std::list<PeerlistEntry>& pl) {
 
     auto priorityNodes = config.getPriorityNodes();
     std::copy(priorityNodes.begin(), priorityNodes.end(), std::back_inserter(m_priority_peers));
+    logger(INFO) << "Priority peers configured: " << m_priority_peers.size();
 
     auto seedNodes = config.getSeedNodes();
     std::copy(seedNodes.begin(), seedNodes.end(), std::back_inserter(m_seed_nodes));

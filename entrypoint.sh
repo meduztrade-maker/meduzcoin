@@ -14,6 +14,7 @@ PRIORITY_ARGS=()
 if [ -n "$PRIORITY_NODE" ]; then
   PRIORITY_ARGS=(--add-priority-node "$PRIORITY_NODE")
 fi
+echo "[entrypoint] PRIORITY_ARGS: ${PRIORITY_ARGS[@]}"
 
 /usr/local/bin/meduzd --data-dir /data --no-console --rpc-bind-ip 0.0.0.0 --p2p-bind-ip 0.0.0.0 --log-level "$LOG_LEVEL" "${PRIORITY_ARGS[@]}" &
 DAEMON_PID=$!
