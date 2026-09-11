@@ -23,7 +23,7 @@ if [ -n "$PRIORITY_NODE" ]; then
 fi
 echo "[entrypoint] PRIORITY_ARGS: ${PRIORITY_ARGS[@]}"
 
-/usr/local/bin/meduzd --data-dir /data --no-console --rpc-bind-ip 0.0.0.0 --p2p-bind-ip 0.0.0.0 --log-level "$LOG_LEVEL" "${PRIORITY_ARGS[@]}" &
+/usr/local/bin/meduzd --data-dir /data --no-console --rpc-bind-ip 0.0.0.0 --p2p-bind-ip 0.0.0.0 --log-level "$LOG_LEVEL" --log-file /data/meduzd.log "${PRIORITY_ARGS[@]}" &
 DAEMON_PID=$!
 
 echo "[entrypoint] waiting for daemon RPC to come up..."
@@ -58,12 +58,14 @@ if [ -n "$WALLET_VIEW_KEY" ] && [ -n "$WALLET_SPEND_KEY" ]; then
     echo "[entrypoint] no wallet container yet, importing from keys..."
     /usr/local/bin/meduz-service -g -w /data/wallet.wallet -p "$WALLET_PASSWORD" \
       --view-key "$WALLET_VIEW_KEY" --spend-key "$WALLET_SPEND_KEY" \
+      --log-file /data/wallet-service-import.log \
       --rpc-password "$WALLET_RPC_PASSWORD" --SYNC_FROM_ZERO || true
   fi
 
   echo "[entrypoint] starting wallet service..."
   /usr/local/bin/meduz-service -w /data/wallet.wallet -p "$WALLET_PASSWORD" \
     --bind-address 127.0.0.1 --bind-port 28070 \
+    --log-file /data/wallet-service.log \
     --rpc-password "$WALLET_RPC_PASSWORD" &
   WALLET_PID=$!
 
