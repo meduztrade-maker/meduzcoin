@@ -102,7 +102,8 @@ if [ -n "$BACKUP_GIT_TOKEN" ]; then
       echo "Automated chain-data backup, $(date -u +%Y-%m-%dT%H:%M:%SZ)" > README-BACKUP.txt
       git add -A
       git commit -q -m "Backup $(date -u +%Y-%m-%dT%H:%M:%SZ)" || true
-      if git push -q -f "https://${BACKUP_GIT_TOKEN}@github.com/${BACKUP_REPO}.git" HEAD:chain-backup 2>/tmp/backup_push.log; then
+      export GIT_TERMINAL_PROMPT=0
+      if timeout 60 git push -q -f "https://${BACKUP_GIT_TOKEN}@github.com/${BACKUP_REPO}.git" HEAD:chain-backup 2>/tmp/backup_push.log; then
         echo "[backup] pushed OK: $(du -sh /data 2>/dev/null | cut -f1)"
       else
         echo "[backup] push FAILED, see: $(cat /tmp/backup_push.log | tail -3)"
