@@ -79,4 +79,9 @@ if [ -n "$WALLET_VIEW_KEY" ] && [ -n "$WALLET_SPEND_KEY" ]; then
   ) &
 fi
 
+(
+  sleep 30
+  echo "[entrypoint] diag: /data size: $(du -sh /data 2>/dev/null | cut -f1)"
+) &
+
 wait $DAEMON_PID
