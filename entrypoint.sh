@@ -7,8 +7,14 @@ WALLET_VIEW_KEY="${WALLET_VIEW_KEY:-}"
 WALLET_SPEND_KEY="${WALLET_SPEND_KEY:-}"
 WALLET_PASSWORD="${WALLET_PASSWORD:-changeme}"
 WALLET_RPC_PASSWORD="${WALLET_RPC_PASSWORD:-changeme}"
+LOG_LEVEL="${LOG_LEVEL:-2}"
 
-/usr/local/bin/meduzd --data-dir /data --no-console --rpc-bind-ip 0.0.0.0 --p2p-bind-ip 0.0.0.0 &
+echo "[entrypoint] diag: checking raw TCP reachability to seed proxy..."
+(echo > /dev/tcp/tokaido.proxy.rlwy.net/26381) 2>&1 && echo "[entrypoint] diag: seed proxy TCP reachable" || echo "[entrypoint] diag: seed proxy TCP NOT reachable"
+echo "[entrypoint] diag: DNS resolution:"
+getent hosts tokaido.proxy.rlwy.net || echo "[entrypoint] diag: DNS lookup failed"
+
+/usr/local/bin/meduzd --data-dir /data --no-console --rpc-bind-ip 0.0.0.0 --p2p-bind-ip 0.0.0.0 --log-level "$LOG_LEVEL" &
 DAEMON_PID=$!
 
 echo "[entrypoint] waiting for daemon RPC to come up..."
