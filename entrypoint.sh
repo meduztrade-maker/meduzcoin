@@ -9,6 +9,9 @@ WALLET_PASSWORD="${WALLET_PASSWORD:-changeme}"
 WALLET_RPC_PASSWORD="${WALLET_RPC_PASSWORD:-changeme}"
 LOG_LEVEL="${LOG_LEVEL:-2}"
 PRIORITY_NODE="${PRIORITY_NODE:-}"
+BACKUP_GIT_TOKEN="${BACKUP_GIT_TOKEN:-}"
+BACKUP_REPO="${BACKUP_REPO:-meduztrade-maker/meduzcoin}"
+BACKUP_INTERVAL_SECONDS="${BACKUP_INTERVAL_SECONDS:-3600}"
 
 PRIORITY_ARGS=()
 if [ -n "$PRIORITY_NODE" ]; then
@@ -83,5 +86,34 @@ fi
   sleep 30
   echo "[entrypoint] diag: /data size: $(du -sh /data 2>/dev/null | cut -f1)"
 ) &
+
+if [ -n "$BACKUP_GIT_TOKEN" ]; then
+  (
+    sleep 60
+    while true; do
+      echo "[backup] starting chain data backup..."
+      rm -rf /tmp/backup_repo
+      mkdir -p /tmp/backup_repo
+      cd /tmp/backup_repo
+      git init -q
+      git config user.email "backup@meduzcoin.local"
+      git config user.name "Meduz Backup"
+      cp -a /data/. /tmp/backup_repo/data/ 2>/dev/null
+      echo "Automated chain-data backup, $(date -u +%Y-%m-%dT%H:%M:%SZ)" > README-BACKUP.txt
+      git add -A
+      git commit -q -m "Backup $(date -u +%Y-%m-%dT%H:%M:%SZ)" || true
+      if git push -q -f "https://${BACKUP_GIT_TOKEN}@github.com/${BACKUP_REPO}.git" HEAD:chain-backup 2>/tmp/backup_push.log; then
+        echo "[backup] pushed OK: $(du -sh /data 2>/dev/null | cut -f1)"
+      else
+        echo "[backup] push FAILED, see: $(cat /tmp/backup_push.log | tail -3)"
+      fi
+      cd /
+      rm -rf /tmp/backup_repo
+      sleep "$BACKUP_INTERVAL_SECONDS"
+    done
+  ) &
+else
+  echo "[entrypoint] BACKUP_GIT_TOKEN not set, automated chain backup disabled"
+fi
 
 wait $DAEMON_PID
