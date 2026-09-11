@@ -4,9 +4,9 @@ A private, CryptoNote-based cryptocurrency. Forked from [TurtleCoin](https://git
 
 ## Status
 
-Live test network. A seed node is running, mining, and holding a real, wallet-verified
-balance. A second node exists but does not yet stay persistently synced (see Known
-issues). Not yet public/announced — this is still the development/testing phase.
+Live test network. Seed and second node both running, mining, and staying in sync
+with each other in real time. Wallet-verified balance on the seed. Not yet
+public/announced — this is still the development/testing phase.
 
 ## Coin parameters
 
@@ -39,17 +39,22 @@ a real wallet balance.
 - To connect a new node to the network, no extra flags are needed — the seed above
   is baked into `src/config/CryptoNoteConfig.h` as the default seed.
 
-### Known issue: staying synced with only 1-2 nodes
+### Staying synced with only 1-2 nodes
 
 Seed connections in this codebase use `just_take_peerlist=true`
 (`NodeServer::connections_maker` in `src/P2p/NetNode.cpp`) — by design, a seed
 connection fetches the peer list and disconnects, it isn't meant to be a long-lived
 sync connection. On a real network with many peers this is fine (you get a peer list,
 then connect to those peers normally). With only one other node to find, there's
-nothing else to connect to. `--add-priority-node` (wired up via the `PRIORITY_NODE`
-env var, see Docker section) was tried as a fix and did not resolve it — the
-connection still cycles handshake-then-close. Not yet root-caused further. Doesn't
-affect the seed's own ability to mine and hold balance; it affects whether a second
+nothing else to connect to, so a second node needs `--add-priority-node` for a
+maintained connection to the seed.
+
+**Gotcha:** `--add-priority-node`'s parser only accepts a raw IP, not a hostname — it
+silently drops anything it can't parse as one (no error, `Priority peers configured: 0`
+in the logs is the only sign). Railway's TCP proxy is only reachable by hostname
+(`tokaido.proxy.rlwy.net`), so `entrypoint.sh` resolves it to an IP with `getent hosts`
+before passing it via `PRIORITY_NODE`. If you point this at a plain IP:port yourself,
+skip the resolution step.
 node stays caught up.
 
 ## Building
