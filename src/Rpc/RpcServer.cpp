@@ -265,6 +265,17 @@ std::vector<std::string> RpcServer::getCorsDomains() {
 }
 
 bool RpcServer::isCoreReady() {
+  // Opt-in escape hatch for disaster recovery: a freshly restored node with no
+  // reachable peers (e.g. every other node was lost) can never flip
+  // isSynchronized() to true on its own, permanently blocking mining and most
+  // RPC calls even though its restored chain data is perfectly valid. Setting
+  // MEDUZ_FORCE_READY=1 lets an operator explicitly declare "there is no one
+  // else to sync with, trust local data" rather than being stuck forever.
+  if (const char* forceReady = std::getenv("MEDUZ_FORCE_READY")) {
+    if (std::string(forceReady) == "1") {
+      return true;
+    }
+  }
   return m_core.getCurrency().isTestnet() || m_p2p.get_payload_object().isSynchronized();
 }
 
