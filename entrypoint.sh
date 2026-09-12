@@ -68,7 +68,7 @@ if [ -n "$WALLET_VIEW_KEY" ] && [ -n "$WALLET_SPEND_KEY" ]; then
   echo "[entrypoint] starting wallet service..."
   /usr/local/bin/meduz-service -w /data/wallet.wallet -p "$WALLET_PASSWORD" \
     --bind-address 127.0.0.1 --bind-port 28070 \
-    --log-file /data/wallet-service.log \
+    --log-file /data/wallet-service.log --log-level 1 \
     --rpc-password "$WALLET_RPC_PASSWORD" &
   WALLET_PID=$!
 
@@ -85,6 +85,21 @@ fi
 (
   sleep 30
   echo "[entrypoint] diag: /data size: $(du -sh /data 2>/dev/null | cut -f1)"
+) &
+
+MAX_LOG_BYTES=$((50*1024*1024))
+(
+  while true; do
+    sleep 1800
+    for f in /data/*.log; do
+      [ -f "$f" ] || continue
+      SZ=$(stat -c%s "$f" 2>/dev/null || echo 0)
+      if [ "$SZ" -gt "$MAX_LOG_BYTES" ]; then
+        echo "[entrypoint] log rotate: $f is ${SZ} bytes, truncating (keeping last 1000 lines)"
+        tail -n 1000 "$f" > "${f}.tmp" && mv "${f}.tmp" "$f"
+      fi
+    done
+  done
 ) &
 
 if [ -n "$BACKUP_GIT_TOKEN" ]; then
