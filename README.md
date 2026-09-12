@@ -117,6 +117,24 @@ This is a stopgap, not a real disaster-recovery setup — it's one person's GitH
 account backing up one person's Railway account. A real backup strategy would use an
 independent storage provider and probably more than one location.
 
+### If you actually have to restore from this backup
+
+```
+git clone -b chain-backup https://github.com/meduztrade-maker/meduzcoin.git restore
+# restore/data/ now has everything: blockchain DB, wallet.wallet, logs
+```
+
+Verified end-to-end once: cloning the branch and pointing `meduzd --data-dir` at the
+restored `data/` folder loads the full chain correctly (right height, no corruption).
+
+**Important:** a restored node started completely alone (every other node lost too —
+the actual disaster scenario) can never pass this codebase's `isSynchronized()` check
+on its own, since that only flips true after a real peer handshake. Until it finds a
+peer, mining and most RPC calls (including what the wallet needs) stay blocked with
+"Core is busy" — even though the restored data is perfectly valid. Set
+`MEDUZ_FORCE_READY=1` on that node to bypass the check and confirm you're intentionally
+trusting the local restored data with no one else to verify against.
+
 ## Binaries
 
 - `meduzd` — the daemon / node
