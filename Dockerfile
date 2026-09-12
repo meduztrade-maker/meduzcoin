@@ -18,6 +18,7 @@ FROM ubuntu:24.04
 
 RUN apt-get update && apt-get install -y \
     libboost-system1.83.0 libboost-filesystem1.83.0 libboost-serialization1.83.0 \
+    git \
     ca-certificates coreutils curl bash gosu \
     && rm -rf /var/lib/apt/lists/*
 
