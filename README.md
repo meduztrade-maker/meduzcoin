@@ -94,6 +94,29 @@ keys are provided. Env vars:
 Mount a volume at `/data` for the chain (and wallet) to survive redeploys — without
 one, every redeploy starts a fresh chain from genesis.
 
+## Backups
+
+**Right now the entire chain exists only on Railway volumes under one account** — if
+that account has a payment or ToS issue, everything (including the founder allocation)
+is gone with no other copy anywhere. `backup.sh` mitigates this: if `BACKUP_GIT_TOKEN`
+is set, `entrypoint.sh` runs it hourly, force-pushing a snapshot of `/data` to a
+`chain-backup` branch on this repo (not `main`, to avoid bloating normal history).
+
+This was a genuinely tricky bug hunt worth recording: it failed silently/differently
+three separate times before working —
+1. No `GIT_TERMINAL_PROMPT=0`: a bad credential could hang forever waiting on a
+   prompt that doesn't exist in a container.
+2. The runtime Docker stage never had `git` installed at all (only the builder stage
+   did) — every git call failed instantly with "command not found".
+3. `BACKUP_GIT_TOKEN` / `BACKUP_REPO` were plain shell variables in `entrypoint.sh`,
+   not `export`ed — so the separate `backup.sh` process saw `BACKUP_REPO` as empty
+   and built a URL like `https://TOKEN@github.com/.git`, which GitHub reports as
+   "Not Found" rather than an obviously-empty-variable error.
+
+This is a stopgap, not a real disaster-recovery setup — it's one person's GitHub
+account backing up one person's Railway account. A real backup strategy would use an
+independent storage provider and probably more than one location.
+
 ## Binaries
 
 - `meduzd` — the daemon / node
