@@ -276,6 +276,7 @@ const static   boost::uuids::uuid CRYPTONOTE_NETWORK         =
 
 // TODO: add more seed nodes as you deploy them, for redundancy.
 const char* const SEED_NODES[] = {
-  "tokaido.proxy.rlwy.net:26381" // Railway trial seed node
+  "tokaido.proxy.rlwy.net:26381", // Railway seed node
+  "gondola.proxy.rlwy.net:33488"  // Railway node2 - second independent bootstrap point
 };
 } // CryptoNote
