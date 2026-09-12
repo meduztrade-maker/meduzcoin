@@ -15,7 +15,8 @@ git config user.name "Meduz Backup"
 echo "Automated chain-data backup, $(date -u +%Y-%m-%dT%H:%M:%SZ)" > README-BACKUP.txt
 git add -A
 git commit -q -m "Backup $(date -u +%Y-%m-%dT%H:%M:%SZ)"
-git push -q -f "https://${BACKUP_GIT_TOKEN}@github.com/${BACKUP_REPO}.git" HEAD:chain-backup
+echo "remote url (redacted): https://***@github.com/${BACKUP_REPO}.git"
+git push -f "https://${BACKUP_GIT_TOKEN}@github.com/${BACKUP_REPO}.git" HEAD:chain-backup 2>&1
 
 cd /
 rm -rf /tmp/backup_repo
