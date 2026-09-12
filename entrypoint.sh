@@ -91,30 +91,12 @@ if [ -n "$BACKUP_GIT_TOKEN" ]; then
   (
     sleep 60
     while true; do
-      echo "[backup] starting chain data backup..."
-      rm -rf /tmp/backup_repo
-      mkdir -p /tmp/backup_repo/data
-      echo "[backup] step: copying /data..."
-      timeout 30 cp -a /data/. /tmp/backup_repo/data/ 2>&1 && echo "[backup] step: copy done" || echo "[backup] step: copy FAILED/timed out"
-      cd /tmp/backup_repo
-      echo "[backup] step: git init..."
-      timeout 15 git init -q
-      git config user.email "backup@meduzcoin.local"
-      git config user.name "Meduz Backup"
-      echo "Automated chain-data backup, $(date -u +%Y-%m-%dT%H:%M:%SZ)" > README-BACKUP.txt
-      echo "[backup] step: git add..."
-      timeout 30 git add -A && echo "[backup] step: add done" || echo "[backup] step: add FAILED/timed out"
-      echo "[backup] step: git commit..."
-      timeout 30 git commit -q -m "Backup $(date -u +%Y-%m-%dT%H:%M:%SZ)" && echo "[backup] step: commit done" || echo "[backup] step: commit FAILED or nothing to commit"
-      export GIT_TERMINAL_PROMPT=0
-      echo "[backup] step: git push..."
-      if timeout 60 git push -q -f "https://${BACKUP_GIT_TOKEN}@github.com/${BACKUP_REPO}.git" HEAD:chain-backup 2>/tmp/backup_push.log; then
-        echo "[backup] pushed OK: $(du -sh /data 2>/dev/null | cut -f1)"
+      echo "[backup] running (max 120s)..."
+      if timeout 120 /usr/local/bin/backup.sh > /tmp/backup_run.log 2>&1; then
+        echo "[backup] OK: $(tail -1 /tmp/backup_run.log)"
       else
-        echo "[backup] push FAILED, see: $(cat /tmp/backup_push.log | tail -3)"
+        echo "[backup] FAILED or timed out. Last output: $(tail -5 /tmp/backup_run.log)"
       fi
-      cd /
-      rm -rf /tmp/backup_repo
       sleep "$BACKUP_INTERVAL_SECONDS"
     done
   ) &

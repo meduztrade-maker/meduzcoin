@@ -27,8 +27,9 @@ COPY --from=builder /src/build/src/meduzd /usr/local/bin/meduzd
 COPY --from=builder /src/build/src/miner /usr/local/bin/miner
 COPY --from=builder /src/build/src/meduz-service /usr/local/bin/meduz-service
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY backup.sh /usr/local/bin/backup.sh
 COPY docker-entrypoint-root.sh /usr/local/bin/docker-entrypoint-root.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/docker-entrypoint-root.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh /usr/local/bin/docker-entrypoint-root.sh /usr/local/bin/backup.sh
 
 EXPOSE 27897 27898
 
